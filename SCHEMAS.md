@@ -52,4 +52,6 @@
 - description (human readable)
 - instruction (for agents)
 - created_at
+- updated_at
 - status (created, approved, denied, implemented)
+- commit
