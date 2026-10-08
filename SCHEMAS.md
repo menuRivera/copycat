@@ -46,6 +46,7 @@
 - id
 - project_id
 - competitor_id
+- type (snapshot, analytic)
 - old_screenshot_id (prev state)
 - new_screenshot_id (new state)
 - title
