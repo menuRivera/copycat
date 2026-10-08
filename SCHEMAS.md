@@ -52,6 +52,7 @@
 - title
 - description (human readable)
 - instruction (for agents)
+- statement (from analytic diff generation)
 - created_at
 - updated_at
 - status (created, approved, denied, implemented)
