@@ -1,12 +1,12 @@
 # Database schemas
 
-## `users`
+## users
 
 - id
 - name
 - email
 
-## `projects`
+## projects
 
 - id
 - user_id (owner)
@@ -17,7 +17,7 @@
 - deployment_url
 - version
 
-## `competitors`
+## competitors
 
 - id
 - project_id
@@ -25,30 +25,29 @@
 - name
 - url
 
-## `elements` (to be considered)
-
-- id
-- competitor_id
-- title
-- dom_snapshot
-
-## `snapshot`
+## snapshots
 
 - id
 - competitor_id
 - created_at
-- screenshot_bucket_id
-- screenshot_public_url
 - dom_snapshot
 - dom_hash (for quickly detect no changes)
 
-## `diffs`
+## screenshots
+
+- id
+- title
+- snapshot_id
+- screenshot_bucket_id
+- screenshot_public_url
+
+## diffs
 
 - id
 - project_id
 - competitor_id
-- old_snapshot_id (prev state)
-- new_snapshot_id (new state)
+- old_screenshot_id (prev state)
+- new_screenshot_id (new state)
 - title
 - description (human readable)
 - instruction (for agents)
