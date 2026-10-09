@@ -22,7 +22,7 @@ const TABS: Record<string, { label: string; statuses: DiffStatus[]; empty: strin
   },
   shipped: {
     label: 'Shipped',
-    statuses: ['implemented', 'failed'],
+    statuses: ['implemented', 'failed', 'pr_open'],
     empty: 'No implemented or failed diffs yet.',
   },
 };
@@ -76,7 +76,7 @@ export default async function ProjectDiffsPage({
   const { data: diffs, error } = await supabase
     .from('diffs')
     .select(
-      'id, title, description, instruction, type, status, created_at, commit, old:screenshots!old_screenshot_id ( screenshot_public_url ), new:screenshots!new_screenshot_id ( screenshot_public_url )',
+      'id, title, description, instruction, area, impact, expected_outcome, statement, pr_url, validation_status, type, status, created_at, commit, old:screenshots!old_screenshot_id ( screenshot_public_url ), new:screenshots!new_screenshot_id ( screenshot_public_url )',
     )
     .eq('project_id', projectId)
     .in('status', TABS[activeTab].statuses)
@@ -87,6 +87,12 @@ export default async function ProjectDiffsPage({
     title: diff.title,
     description: diff.description,
     instruction: diff.instruction,
+    area: diff.area,
+    impact: diff.impact,
+    expected_outcome: diff.expected_outcome,
+    statement: diff.statement,
+    pr_url: diff.pr_url,
+    validation_status: diff.validation_status,
     type: diff.type,
     status: diff.status,
     created_at: diff.created_at,

@@ -67,6 +67,9 @@ export async function createInitDiff(input: {
   title: string;
   description: string;
   instruction: string;
+  area: string;
+  impact: 'low' | 'medium' | 'high';
+  expectedOutcome: string;
 }): Promise<string> {
   const supabase = createServiceClient();
   const { data, error } = await supabase
@@ -79,6 +82,9 @@ export async function createInitDiff(input: {
       title: input.title,
       description: input.description,
       instruction: input.instruction,
+      area: input.area,
+      impact: input.impact,
+      expected_outcome: input.expectedOutcome,
     })
     .select('id')
     .single();

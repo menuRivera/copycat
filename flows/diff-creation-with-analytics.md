@@ -12,7 +12,7 @@ flowchart TD
     H --> I["diff-worthy-filter<br/>(TypeSafe Jev, Noul question)<br/>is this statement diff worthy?"]
     I --> I1[/"noul: yes/no"/]
     I1 -- no --> H
-    I1 -- yes --> K["diff-creation (LLM)<br/>extract title, description, instruction"]
+    I1 -- yes --> K["diff-creation (LLM)<br/>extract title, description, instruction,<br/>area, impact, expected_outcome"]
     K --> L[/diff title, diff description, diff instruction/]
     L --> M["create diff record<br/>status: created, type: analytic<br/>statement included"]
     M --> H
@@ -26,6 +26,7 @@ Side notes:
   - time spent per page
   - clicks per button
   - blank (no-op) clicks per section
+  - visit-to-click funnel conversion
   - performance: load time per page, api req time
 - Structured data shape example:
 
@@ -43,7 +44,7 @@ Side notes:
 
 - structure data is deterministic code (query + compute deltas), not an LLM step.
 - The diff record persists the originating statement (SCHEMAS: diffs.statement).
-- Ingestion is not wired yet (otel + signoz are the mental model). Dev data is seeded synthetically; the ClickHouse schema lives in `clickhouse/init.sql`.
+- Ingestion: the worker also runs a local ingest server (`pnpm --filter worker ingest`, `POST /ingest`) that validates events with zod and writes them to clickhouse using the project `ingest_token`; otel + signoz remain the production mental model. Dev data can also be seeded synthetically; the ClickHouse schema lives in `clickhouse/init.sql`.
 - gen-statements currently reasons over the structured metrics only; reading the project codebase is a future refinement.
 - gen-statements receives the structured data and returns statements shaped `{ category, statement, explanation }`, for example:
 

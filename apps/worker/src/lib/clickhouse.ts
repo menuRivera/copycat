@@ -7,7 +7,7 @@ import {
   type StructuredMetric,
 } from '@copycat/core';
 
-export type SeedEvent = {
+export type AnalyticsEvent = {
   project_id: string;
   event_type: string;
   page: string;
@@ -15,6 +15,8 @@ export type SeedEvent = {
   element: string;
   duration_ms: number;
   ts: string;
+  x?: number;
+  y?: number;
 };
 
 let client: ClickHouseClient | null = null;
@@ -29,14 +31,14 @@ function getClient(): ClickHouseClient {
   return client;
 }
 
-function formatDate(date: Date): string {
+export function formatClickHouseDate(date: Date): string {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
 
 function monthWindow(offset: number, now: Date): { from: string; to: string } {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1));
   const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset + 1, 1));
-  return { from: formatDate(from), to: formatDate(to) };
+  return { from: formatClickHouseDate(from), to: formatClickHouseDate(to) };
 }
 
 async function aggregate(
@@ -69,7 +71,7 @@ export async function retrieveStructuredMetrics(projectId: string): Promise<Stru
   return buildStructuredMetrics(current, previous);
 }
 
-export async function insertEvents(rows: SeedEvent[]): Promise<void> {
+export async function insertEvents(rows: AnalyticsEvent[]): Promise<void> {
   if (rows.length === 0) {
     return;
   }

@@ -22,11 +22,25 @@ describe('domDiffListSchema', () => {
 });
 
 describe('diffFieldsSchema', () => {
-  it('requires title, description and instruction', () => {
+  const valid = {
+    title: 't',
+    description: 'd',
+    instruction: 'i',
+    area: 'Hero',
+    impact: 'high',
+    expected_outcome: 'More signups',
+  };
+
+  it('requires title, description, instruction, area, impact and expected_outcome', () => {
     expect(diffFieldsSchema.safeParse({ title: 't', description: 'd' }).success).toBe(false);
     expect(
       diffFieldsSchema.safeParse({ title: 't', description: 'd', instruction: 'i' }).success,
-    ).toBe(true);
+    ).toBe(false);
+    expect(diffFieldsSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('rejects an unknown impact', () => {
+    expect(diffFieldsSchema.safeParse({ ...valid, impact: 'urgent' }).success).toBe(false);
   });
 });
 

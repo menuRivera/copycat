@@ -4,13 +4,21 @@ import { createServiceClient } from './lib/supabase';
 import { runAgent } from './lib/agent';
 import {
   commitAll,
+  defaultBranch,
   diffFromBase,
   mergeAndPush,
   prepareWorktree,
+  pushDiffBranch as gitPushDiffBranch,
   runTests,
   truncate,
   type RepoPaths,
 } from './lib/git';
+import {
+  findDeploymentPreviewUrl,
+  openPullRequest,
+  type PullRequestResult,
+} from './lib/github';
+import { validateDeployment, type BrowserValidationResult } from './lib/validate';
 import { askNoul, NOUL_YES_THRESHOLD } from './lib/typesafe';
 
 export type DiffData = {
@@ -21,14 +29,20 @@ export type DiffData = {
   title: string;
   description: string;
   instruction: string;
+  area: string | null;
+  impact: string | null;
+  expectedOutcome: string | null;
   status: string;
 };
 
 function requestBlock(diff: DiffData): string {
   return [
     `Title: ${diff.title}`,
+    `Area: ${diff.area ?? 'unknown'}`,
+    `Impact: ${diff.impact ?? 'unknown'}`,
     `Description: ${diff.description}`,
     `Instruction: ${diff.instruction}`,
+    `Expected outcome: ${diff.expectedOutcome ?? 'not specified'}`,
   ].join('\n');
 }
 
@@ -36,7 +50,9 @@ export async function getDiffData(input: { diffId: string }): Promise<DiffData> 
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('diffs')
-    .select('id, project_id, title, description, instruction, status, projects ( name, repo_url )')
+    .select(
+      'id, project_id, title, description, instruction, area, impact, expected_outcome, status, projects ( name, repo_url )',
+    )
     .eq('id', input.diffId)
     .single();
 
@@ -52,6 +68,9 @@ export async function getDiffData(input: { diffId: string }): Promise<DiffData> 
     title: data.title,
     description: data.description,
     instruction: data.instruction,
+    area: data.area,
+    impact: data.impact,
+    expectedOutcome: data.expected_outcome,
     status: data.status,
   };
 }
@@ -196,13 +215,105 @@ export async function releaseChange(input: {
   return { head };
 }
 
+export async function pushDiffBranch(input: {
+  repoDir: string;
+  diffId: string;
+}): Promise<void> {
+  await gitPushDiffBranch(input.repoDir, input.diffId);
+}
+
+export async function getDefaultBranch(input: { repoDir: string }): Promise<string> {
+  return defaultBranch(input.repoDir);
+}
+
+export async function openPullRequestForDiff(input: {
+  diff: DiffData;
+  base: string;
+}): Promise<PullRequestResult> {
+  return openPullRequest({
+    repoUrl: input.diff.repoUrl,
+    head: `diff-${input.diff.diffId}`,
+    base: input.base,
+    title: `Copycat: ${input.diff.title}`,
+    body: [
+      'Automated change proposed by Copycat.',
+      '',
+      `- Area: ${input.diff.area ?? 'unknown'}`,
+      `- Impact: ${input.diff.impact ?? 'unknown'}`,
+      `- Expected outcome: ${input.diff.expectedOutcome ?? 'not specified'}`,
+      '',
+      '## Description',
+      '',
+      input.diff.description,
+      '',
+      '## Agent instruction',
+      '',
+      input.diff.instruction,
+    ].join('\n'),
+  });
+}
+
+export type ValidationUrlResolution =
+  | { kind: 'url'; url: string }
+  | { kind: 'pending' }
+  | { kind: 'none'; reason: string };
+
+export async function resolveValidationUrl(input: {
+  diffId: string;
+  allowDeploymentFallback?: boolean;
+}): Promise<ValidationUrlResolution> {
+  if (env.VALIDATION_URL) {
+    return { kind: 'url', url: env.VALIDATION_URL };
+  }
+
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from('diffs')
+    .select('id, projects ( repo_url, deployment_url )')
+    .eq('id', input.diffId)
+    .single();
+
+  const repoUrl = data?.projects?.repo_url ?? '';
+  const deploymentUrl = data?.projects?.deployment_url ?? null;
+
+  const preview = await findDeploymentPreviewUrl({
+    repoUrl,
+    branch: `diff-${input.diffId}`,
+  });
+  if (preview.kind === 'url') {
+    return preview;
+  }
+
+  if (preview.kind === 'pending' && !input.allowDeploymentFallback) {
+    return preview;
+  }
+
+  if (deploymentUrl) {
+    return { kind: 'url', url: deploymentUrl };
+  }
+
+  return {
+    kind: 'none',
+    reason: preview.kind === 'none' ? preview.reason : 'no preview or deployment url available',
+  };
+}
+
+export async function validateChange(input: {
+  diffId: string;
+  url: string;
+}): Promise<BrowserValidationResult> {
+  return validateDeployment(input);
+}
+
 export async function updateDiffStatus(input: {
   diffId: string;
-  status: 'implemented' | 'failed';
+  status: 'implemented' | 'failed' | 'pr_open';
   commit?: string;
 }): Promise<void> {
   const supabase = createServiceClient();
-  const patch: { status: 'implemented' | 'failed'; commit?: string } = { status: input.status };
+  const patch: { status: 'implemented' | 'failed' | 'pr_open'; commit?: string } = {
+    status: input.status,
+  };
   if (input.commit) {
     patch.commit = input.commit;
   }
@@ -210,5 +321,25 @@ export async function updateDiffStatus(input: {
   const { error } = await supabase.from('diffs').update(patch).eq('id', input.diffId);
   if (error) {
     throw new Error(`update diff failed: ${error.message}`);
+  }
+}
+
+export async function updateDiffValidation(input: {
+  diffId: string;
+  validationStatus: 'passed' | 'failed' | 'skipped';
+  notes: string;
+  prUrl?: string;
+}): Promise<void> {
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from('diffs')
+    .update({
+      validation_status: input.validationStatus,
+      validation_notes: input.notes,
+      ...(input.prUrl ? { pr_url: input.prUrl } : {}),
+    })
+    .eq('id', input.diffId);
+  if (error) {
+    throw new Error(`update diff validation failed: ${error.message}`);
   }
 }

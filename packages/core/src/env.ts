@@ -16,6 +16,8 @@ export const envSchema = z.object({
   ANTHROPIC_MODEL: optionalString,
   WORKSPACE_DIR: optionalString,
   GITHUB_TOKEN: optionalString,
+  VALIDATION_URL: optionalString,
+  INGEST_PORT: optionalString,
   CLICKHOUSE_URL: optionalString,
   CLICKHOUSE_USERNAME: optionalString,
   CLICKHOUSE_PASSWORD: optionalString,

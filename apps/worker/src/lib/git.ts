@@ -25,10 +25,17 @@ function authedUrl(repoUrl: string): string {
   if (!env.GITHUB_TOKEN) {
     return repoUrl;
   }
-  const url = new URL(repoUrl);
-  url.username = 'x-access-token';
-  url.password = env.GITHUB_TOKEN;
-  return url.toString();
+  try {
+    const url = new URL(repoUrl);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return repoUrl;
+    }
+    url.username = 'x-access-token';
+    url.password = env.GITHUB_TOKEN;
+    return url.toString();
+  } catch {
+    return repoUrl;
+  }
 }
 
 function sanitize(message: string): string {
@@ -142,6 +149,13 @@ export async function runTests(
       output: truncate(`${failure.stdout ?? ''}${failure.stderr ?? ''}${failure.message}`, 4000),
     };
   }
+}
+
+export async function pushDiffBranch(repoDir: string, diffId: string): Promise<void> {
+  await git(
+    ['push', '--force-with-lease', 'origin', `diff-${diffId}:diff-${diffId}`],
+    repoDir,
+  );
 }
 
 export async function mergeAndPush(repoDir: string, diffId: string): Promise<string> {

@@ -5,6 +5,9 @@
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:worker": "pnpm --filter worker dev",
+    "demo:competitor": "node demo/competitor/serve.mjs",
+    "demo:preview": "node demo/preview/serve.mjs",
+    "demo:repo:setup": "bash scripts/demo/setup-local-remote.sh",
     "lint": "eslint .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",

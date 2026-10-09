@@ -78,7 +78,7 @@ export async function generateAnalyticDiff(input: {
     model: getModel(),
     schema: diffFieldsSchema,
     instructions:
-      'Turn this product-analytics finding into a proposed change for our own product. Write a short title, a human-readable description explaining the finding and the proposed change, and a precise instruction for a coding agent working in our repository.',
+      'Turn this product-analytics finding into a proposed change for our own product. Write a short title, a human-readable description explaining the finding and the proposed change, and a precise instruction for a coding agent working in our repository. Also classify the product area, the expected business impact (low, medium or high), and what should happen once the change is applied.',
     prompt: [
       `Project: ${input.project.name}`,
       `Repository: ${input.project.repoUrl}`,
@@ -105,6 +105,9 @@ export async function createAnalyticDiff(input: {
       title: input.fields.title,
       description: input.fields.description,
       instruction: input.fields.instruction,
+      area: input.fields.area,
+      impact: input.fields.impact,
+      expected_outcome: input.fields.expected_outcome,
       statement: JSON.stringify(input.statement),
     })
     .select('id')

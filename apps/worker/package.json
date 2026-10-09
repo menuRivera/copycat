@@ -6,9 +6,11 @@
     "dev": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
     "scan": "tsx --env-file-if-exists=../../.env src/scripts/run-snapshot.ts",
     "analytics": "tsx --env-file-if-exists=../../.env src/scripts/run-analytics.ts",
+    "ingest": "tsx --env-file-if-exists=../../.env src/ingestServer.ts",
     "seed:analytics": "tsx --env-file-if-exists=../../.env src/scripts/seed-analytics.ts",
     "schedule": "tsx --env-file-if-exists=../../.env src/scripts/register-schedules.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.78",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "tsx": "^4.19.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.7"
   }
 }

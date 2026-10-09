@@ -68,52 +68,70 @@ export type Database = {
       }
       diffs: {
         Row: {
+          area: string | null
           commit: string | null
           competitor_id: string | null
           created_at: string
           description: string
+          expected_outcome: string | null
           id: string
+          impact: Database["public"]["Enums"]["diff_impact"] | null
           instruction: string
           new_screenshot_id: string | null
           old_screenshot_id: string | null
+          pr_url: string | null
           project_id: string
           statement: string | null
           status: Database["public"]["Enums"]["diff_status"]
           title: string
           type: Database["public"]["Enums"]["diff_type"]
           updated_at: string
+          validation_notes: string | null
+          validation_status: Database["public"]["Enums"]["validation_status"]
         }
         Insert: {
+          area?: string | null
           commit?: string | null
           competitor_id?: string | null
           created_at?: string
           description: string
+          expected_outcome?: string | null
           id?: string
+          impact?: Database["public"]["Enums"]["diff_impact"] | null
           instruction: string
           new_screenshot_id?: string | null
           old_screenshot_id?: string | null
+          pr_url?: string | null
           project_id: string
           statement?: string | null
           status?: Database["public"]["Enums"]["diff_status"]
           title: string
           type: Database["public"]["Enums"]["diff_type"]
           updated_at?: string
+          validation_notes?: string | null
+          validation_status?: Database["public"]["Enums"]["validation_status"]
         }
         Update: {
+          area?: string | null
           commit?: string | null
           competitor_id?: string | null
           created_at?: string
           description?: string
+          expected_outcome?: string | null
           id?: string
+          impact?: Database["public"]["Enums"]["diff_impact"] | null
           instruction?: string
           new_screenshot_id?: string | null
           old_screenshot_id?: string | null
+          pr_url?: string | null
           project_id?: string
           statement?: string | null
           status?: Database["public"]["Enums"]["diff_status"]
           title?: string
           type?: Database["public"]["Enums"]["diff_type"]
           updated_at?: string
+          validation_notes?: string | null
+          validation_status?: Database["public"]["Enums"]["validation_status"]
         }
         Relationships: [
           {
@@ -152,6 +170,7 @@ export type Database = {
           created_at: string
           deployment_url: string | null
           id: string
+          ingest_token: string
           name: string
           repo_url: string
           user_id: string
@@ -162,6 +181,7 @@ export type Database = {
           created_at?: string
           deployment_url?: string | null
           id?: string
+          ingest_token?: string
           name: string
           repo_url: string
           user_id: string
@@ -172,6 +192,7 @@ export type Database = {
           created_at?: string
           deployment_url?: string | null
           id?: string
+          ingest_token?: string
           name?: string
           repo_url?: string
           user_id?: string
@@ -290,8 +311,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      diff_status: "created" | "approved" | "denied" | "implemented" | "failed"
+      diff_impact: "low" | "medium" | "high"
+      diff_status:
+        | "created"
+        | "approved"
+        | "denied"
+        | "implemented"
+        | "failed"
+        | "pr_open"
       diff_type: "snapshot" | "analytic" | "init"
+      validation_status: "none" | "pending" | "passed" | "failed" | "skipped"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -422,8 +451,17 @@ export const Constants = {
   },
   public: {
     Enums: {
-      diff_status: ["created", "approved", "denied", "implemented", "failed"],
+      diff_impact: ["low", "medium", "high"],
+      diff_status: [
+        "created",
+        "approved",
+        "denied",
+        "implemented",
+        "failed",
+        "pr_open",
+      ],
       diff_type: ["snapshot", "analytic", "init"],
+      validation_status: ["none", "pending", "passed", "failed", "skipped"],
     },
   },
 } as const

@@ -37,6 +37,7 @@ describe('toMetricMap', () => {
     expect(map.get('avg_time_on_page_ms')).toBe(28_000);
     expect(map.get('avg_load_time_ms')).toBe(1_250);
     expect(map.get('avg_api_req_ms')).toBe(300);
+    expect(map.get('funnel_visit_to_click_pct')).toBe(26);
   });
 
   it('ignores empty breakdown keys', () => {

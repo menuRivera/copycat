@@ -1,4 +1,4 @@
-import { insertEvents, type SeedEvent } from '../lib/clickhouse';
+import { insertEvents, type AnalyticsEvent } from '../lib/clickhouse';
 
 const projectId: string = process.env.SEED_PROJECT_ID ?? process.argv[2] ?? '';
 if (!projectId) {
@@ -29,10 +29,12 @@ type EventSpec = {
   element: string;
   count: number;
   duration: (index: number) => number;
+  x?: number;
+  y?: number;
 };
 
-function buildEvents(specs: EventSpec[], monthStartDate: Date, cap: Date): SeedEvent[] {
-  const events: SeedEvent[] = [];
+function buildEvents(specs: EventSpec[], monthStartDate: Date, cap: Date): AnalyticsEvent[] {
+  const events: AnalyticsEvent[] = [];
   for (const spec of specs) {
     for (let index = 0; index < spec.count; index++) {
       events.push({
@@ -43,6 +45,8 @@ function buildEvents(specs: EventSpec[], monthStartDate: Date, cap: Date): SeedE
         element: spec.element,
         duration_ms: spec.duration(index),
         ts: spreadTs(monthStartDate, index, spec.count, cap),
+        ...(spec.x !== undefined ? { x: spec.x } : {}),
+        ...(spec.y !== undefined ? { y: spec.y } : {}),
       });
     }
   }
@@ -58,22 +62,26 @@ const pageView = (page: string, count: number): EventSpec => ({
   duration: (index) => 20_000 + (index % 20) * 1_000,
 });
 
-const click = (element: string, count: number): EventSpec => ({
+const click = (element: string, count: number, x: number, y: number): EventSpec => ({
   event_type: 'click',
   page: '/',
   section: '',
   element,
   count,
   duration: () => 0,
+  x,
+  y,
 });
 
-const noopClick = (section: string, count: number): EventSpec => ({
+const noopClick = (section: string, count: number, x: number, y: number): EventSpec => ({
   event_type: 'noop_click',
   page: '/',
   section,
   element: '',
   count,
   duration: () => 0,
+  x,
+  y,
 });
 
 const loadTime = (count: number, base: number): EventSpec => ({
@@ -99,9 +107,9 @@ async function main(): Promise<void> {
     [
       pageView('/', 400),
       pageView('/pricing', 100),
-      click('buy', 50),
-      click('docs', 80),
-      noopClick('contact', 30),
+      click('buy', 50, 720, 380),
+      click('docs', 80, 120, 60),
+      noopClick('contact', 30, 640, 520),
       loadTime(20, 1200),
       apiReq(20, 300),
     ],
@@ -113,9 +121,9 @@ async function main(): Promise<void> {
     [
       pageView('/', 470),
       pageView('/pricing', 110),
-      click('buy', 44),
-      click('docs', 90),
-      noopClick('contact', 40),
+      click('buy', 44, 720, 380),
+      click('docs', 90, 120, 60),
+      noopClick('contact', 40, 640, 520),
       loadTime(20, 1500),
       apiReq(20, 320),
     ],

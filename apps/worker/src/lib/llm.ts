@@ -68,7 +68,7 @@ export async function generateInitFields(input: {
     model: getModel(),
     schema: diffFieldsSchema,
     instructions:
-      'Our repository is empty and we are starting a new product. Based on the competitor reference below, write a short title, a human-readable description of what should be built, and a precise setup instruction for a coding agent: initialize the project, choose a sensible stack, and scaffold the core pages and sections to match the competitor reference.',
+      'Our repository is empty and we are starting a new product. Based on the competitor reference below, write a short title, a human-readable description of what should be built, and a precise setup instruction for a coding agent: initialize the project, choose a sensible stack, and scaffold the core pages and sections to match the competitor reference. Also classify the product area, the expected business impact (low, medium or high), and what should happen once the change is applied.',
     prompt: [
       `Project: ${input.projectName}`,
       `Repository: ${input.repoUrl}`,
@@ -90,7 +90,7 @@ export async function generateDiffFields(input: {
     model: getModel(),
     schema: diffFieldsSchema,
     instructions:
-      'You turn a competitor change into a proposed change for our own product. Write a short title, a human-readable description explaining the change and why it may matter, and a precise instruction for a coding agent working in our repository.',
+      'You turn a competitor change into a proposed change for our own product. Write a short title, a human-readable description explaining the change and why it may matter, and a precise instruction for a coding agent working in our repository. Also classify the product area, the expected business impact (low, medium or high), and what should happen once the change is applied.',
     prompt: [
       `Our project: ${input.projectName}`,
       `Our repository: ${input.repoUrl}`,

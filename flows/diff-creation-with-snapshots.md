@@ -16,7 +16,7 @@ flowchart TD
     J --> K["create old/new screenshot records<br/>stored in S3-like object storage"]
     K --> M{"noul was yes?"}
     M -- yes --> V["visual-diff (VLM)<br/>describe the difference between old and new image"]
-    M -- no --> L["diff-creation (LLM)<br/>extract title, description, instruction"]
+    M -- no --> L["diff-creation (LLM)<br/>extract title, description, instruction,<br/>area, impact, expected_outcome"]
     V --> L
     L --> N[/diff title, diff description, diff instruction/]
     N --> O["create diff record<br/>status: created, type: snapshot"]

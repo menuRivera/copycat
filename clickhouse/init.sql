@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS copycat.events (
   section String,
   element String,
   duration_ms Float64,
+  x Float64 DEFAULT 0,
+  y Float64 DEFAULT 0,
   ts DateTime
 )
 ENGINE = MergeTree

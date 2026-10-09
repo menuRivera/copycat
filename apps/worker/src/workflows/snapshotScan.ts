@@ -75,6 +75,9 @@ async function runChanges(target: Target): Promise<number> {
       title: fields.title,
       description: fields.description,
       instruction: fields.instruction,
+      area: fields.area,
+      impact: fields.impact,
+      expectedOutcome: fields.expected_outcome,
     });
 
     created += 1;
@@ -144,6 +147,9 @@ async function runGap(target: Target): Promise<number> {
       title: fields.title,
       description: fields.description,
       instruction: fields.instruction,
+      area: fields.area,
+      impact: fields.impact,
+      expectedOutcome: fields.expected_outcome,
     });
 
     created += 1;
@@ -180,6 +186,9 @@ async function runInit(target: Target): Promise<number> {
     title: fields.title,
     description: fields.description,
     instruction: fields.instruction,
+    area: fields.area,
+    impact: fields.impact,
+    expectedOutcome: fields.expected_outcome,
   });
 
   return 1;

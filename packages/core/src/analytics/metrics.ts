@@ -35,6 +35,7 @@ export function toMetricMap(rows: AggregatedEventRow[]): Map<string, number> {
 
   let pageViewCount = 0;
   let pageViewDuration = 0;
+  let clickCount = 0;
   let loadDuration = 0;
   let loadCount = 0;
   let apiDuration = 0;
@@ -48,6 +49,7 @@ export function toMetricMap(rows: AggregatedEventRow[]): Map<string, number> {
         pageVisits.set(row.page, (pageVisits.get(row.page) ?? 0) + row.count);
         break;
       case 'click':
+        clickCount += row.count;
         clicks.set(row.element, (clicks.get(row.element) ?? 0) + row.count);
         break;
       case 'noop_click':
@@ -65,6 +67,9 @@ export function toMetricMap(rows: AggregatedEventRow[]): Map<string, number> {
   }
 
   totals.set('page_visits', pageViewCount);
+  if (pageViewCount > 0 && clickCount > 0) {
+    totals.set('funnel_visit_to_click_pct', round((clickCount / pageViewCount) * 100));
+  }
   if (pageViewCount > 0) {
     totals.set('avg_time_on_page_ms', round(pageViewDuration / pageViewCount));
   }
