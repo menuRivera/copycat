@@ -79,7 +79,7 @@ Deterministic code is the source of truth for everything numeric or stateful:
 Agents only interpret unstructured input and produce text or typed verdicts:
 
 - Coding agent: plan, implement and refine code changes inside a sandboxed worktree.
-- LLM (vercel/ai `generateObject` + zod): dom-diff extraction, gap analysis, analytics statements, diff fields (including area/impact/expected outcome), visual descriptions.
+- LLM (vercel/ai `generateObject` + zod): dom-diff extraction, gap analysis, analytics statements, diff fields (including area/impact/expected outcome), visual descriptions. Prompt text and detector questions live in `packages/core/src/prompts/`.
 - TypeSafe Noul: typed yes/no questions — is this a visual diff, is this statement diff-worthy, does this diff implement the request. Answers come back as scores; nothing is parsed from free text.
 
 External services are wrapped by activities, never called from workflow code: Supabase, ClickHouse, Temporal, GitHub API, Anthropic, TypeSafe, and any remote website reached through Playwright. Temporal workflows stay deterministic; side effects live in activities, which are idempotent where practical (snapshot rows are created before comparison, screenshots are upserted by deterministic paths, workflow IDs dedupe approvals).
