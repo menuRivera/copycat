@@ -40,6 +40,46 @@ export async function describeVisualDiff(oldPng: Buffer, newPng: Buffer): Promis
   return text;
 }
 
+export async function generateGapDiffs(input: {
+  ownDom: string;
+  competitorDom: string;
+  projectName: string;
+  repoUrl: string;
+  competitorName: string;
+}): Promise<DomDiff[]> {
+  const { object } = await generateObject({
+    model: getModel(),
+    schema: domDiffListSchema,
+    instructions:
+      'You compare our product page (OLD DOM) with a competitor page (NEW DOM). Report only actionable gaps: content, features, structure, pricing, or CTAs the competitor has and we lack or do worse. Ignore analytics tags, nonces, cache-busting ids, timestamps, and noise. For each gap return a CSS selector that locates the section on the competitor page, a one-sentence summary, and the relevant old/new text.',
+    prompt: `Our product (${input.projectName}, ${input.repoUrl}):\n${truncateDom(input.ownDom)}\n\nCompetitor (${input.competitorName}):\n${truncateDom(input.competitorDom)}`,
+  });
+  return object.diffs;
+}
+
+export async function generateInitFields(input: {
+  projectName: string;
+  repoUrl: string;
+  competitorName: string;
+  competitorUrl: string;
+  competitorDom: string;
+}): Promise<DiffFields> {
+  const { object } = await generateObject({
+    model: getModel(),
+    schema: diffFieldsSchema,
+    instructions:
+      'Our repository is empty and we are starting a new product. Based on the competitor reference below, write a short title, a human-readable description of what should be built, and a precise setup instruction for a coding agent: initialize the project, choose a sensible stack, and scaffold the core pages and sections to match the competitor reference.',
+    prompt: [
+      `Project: ${input.projectName}`,
+      `Repository: ${input.repoUrl}`,
+      `Competitor: ${input.competitorName} (${input.competitorUrl})`,
+      'Competitor DOM:',
+      truncateDom(input.competitorDom),
+    ].join('\n'),
+  });
+  return object;
+}
+
 export async function generateDiffFields(input: {
   domDiff: DomDiff;
   visualDescription: string | null;

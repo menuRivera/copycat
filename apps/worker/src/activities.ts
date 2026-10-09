@@ -8,11 +8,14 @@ import {
 
 export * from './diffActivities';
 export * from './analyticsActivities';
+export * from './setupActivities';
 import { createServiceClient, downloadScreenshot, uploadScreenshot } from './lib/supabase';
 import {
   describeVisualDiff,
   generateDiffFields as generateDiffFieldsLlm,
   generateDomDiffs as generateDomDiffsLlm,
+  generateGapDiffs as generateGapDiffsLlm,
+  generateInitFields as generateInitFieldsLlm,
 } from './lib/llm';
 import { isVisualDiff } from './lib/typesafe';
 
@@ -20,7 +23,9 @@ export type Target = {
   projectId: string;
   projectName: string;
   repoUrl: string;
+  deploymentUrl: string | null;
   competitorId: string;
+  competitorName: string;
   competitorUrl: string;
 };
 
@@ -30,13 +35,19 @@ export type SnapshotRef = {
   dom: string;
 };
 
-export async function listTargets(): Promise<Target[]> {
+export async function listTargets(input?: { projectIds?: string[] }): Promise<Target[]> {
   const supabase = createServiceClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('projects')
-    .select('id, name, repo_url, competitors!inner(id, url, active)')
+    .select('id, name, repo_url, deployment_url, competitors!inner(id, name, url, active)')
     .eq('active', true)
     .eq('competitors.active', true);
+
+  if (input?.projectIds && input.projectIds.length > 0) {
+    query = query.in('id', input.projectIds);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`listTargets failed: ${error.message}`);
@@ -47,7 +58,9 @@ export async function listTargets(): Promise<Target[]> {
       projectId: project.id,
       projectName: project.name,
       repoUrl: project.repo_url,
+      deploymentUrl: project.deployment_url,
       competitorId: competitor.id,
+      competitorName: competitor.name,
       competitorUrl: competitor.url,
     })),
   );
@@ -58,6 +71,7 @@ export async function checkReachable(input: { url: string }): Promise<boolean> {
 }
 
 export async function captureSnapshot(input: {
+  projectId: string;
   competitorId: string;
   url: string;
 }): Promise<SnapshotRef> {
@@ -67,7 +81,12 @@ export async function captureSnapshot(input: {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('snapshots')
-    .insert({ competitor_id: input.competitorId, dom_snapshot: dom, dom_hash: domHash })
+    .insert({
+      project_id: input.projectId,
+      competitor_id: input.competitorId,
+      dom_snapshot: dom,
+      dom_hash: domHash,
+    })
     .select('id')
     .single();
 
@@ -107,6 +126,26 @@ export async function generateDomDiffs(input: {
   newDom: string;
 }): Promise<DomDiff[]> {
   return generateDomDiffsLlm(input.oldDom, input.newDom);
+}
+
+export async function generateGapDiffs(input: {
+  ownDom: string;
+  competitorDom: string;
+  projectName: string;
+  repoUrl: string;
+  competitorName: string;
+}): Promise<DomDiff[]> {
+  return generateGapDiffsLlm(input);
+}
+
+export async function generateInitFields(input: {
+  projectName: string;
+  repoUrl: string;
+  competitorName: string;
+  competitorUrl: string;
+  competitorDom: string;
+}): Promise<DiffFields> {
+  return generateInitFieldsLlm(input);
 }
 
 export async function detectVisual(input: { domDiff: DomDiff }): Promise<boolean> {

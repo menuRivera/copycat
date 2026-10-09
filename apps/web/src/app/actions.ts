@@ -3,8 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { projectCreateSchema } from '@copycat/core';
+import { env, projectCreateSchema } from '@copycat/core';
 import { createClient } from '@/lib/supabase/server';
+import { getTemporalClient } from '@/lib/temporal';
 import type { ProjectFormState } from './project-form-state';
 
 function firstMessages(fieldErrors: Record<string, string[] | undefined>): Record<string, string> {
@@ -75,6 +76,17 @@ export async function createProject(
   if (competitorsError) {
     await supabase.from('projects').delete().eq('id', project.id);
     return { fieldErrors: {}, formError: competitorsError.message };
+  }
+
+  try {
+    const client = await getTemporalClient();
+    await client.workflow.start('snapshotScanWorkflow', {
+      taskQueue: env.TEMPORAL_TASK_QUEUE,
+      workflowId: `project-setup-${project.id}-${Date.now()}`,
+      args: [{ projectIds: [project.id], mode: input.deployment_url ? 'gap' : 'init' }],
+    });
+  } catch (error) {
+    console.error('failed to start project setup workflow', { projectId: project.id, error });
   }
 
   revalidatePath('/');

@@ -13,3 +13,4 @@
 - vlm sdk: vercel/ai (for visual lang models queries)
 - analytics ingestion: otel + signoz
 - analytics db: clickhouse
+- styles: tailwindcss + react motion

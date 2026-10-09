@@ -28,7 +28,9 @@
 ## snapshots
 
 - id
-- competitor_id
+- project_id (owner project)
+- competitor_id (nullable; null for our own site captures)
+- kind (competitor, own)
 - created_at
 - dom_snapshot
 - dom_hash (for quickly detect no changes)
@@ -46,7 +48,7 @@
 - id
 - project_id
 - competitor_id
-- type (snapshot, analytic, init?)
+- type (snapshot, analytic, init)
 - old_screenshot_id (prev state)
 - new_screenshot_id (new state)
 - title

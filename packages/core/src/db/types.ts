@@ -221,25 +221,31 @@ export type Database = {
       }
       snapshots: {
         Row: {
-          competitor_id: string
+          competitor_id: string | null
           created_at: string
           dom_hash: string
           dom_snapshot: string
           id: string
+          kind: string
+          project_id: string
         }
         Insert: {
-          competitor_id: string
+          competitor_id?: string | null
           created_at?: string
           dom_hash: string
           dom_snapshot: string
           id?: string
+          kind?: string
+          project_id: string
         }
         Update: {
-          competitor_id?: string
+          competitor_id?: string | null
           created_at?: string
           dom_hash?: string
           dom_snapshot?: string
           id?: string
+          kind?: string
+          project_id?: string
         }
         Relationships: [
           {
@@ -247,6 +253,13 @@ export type Database = {
             columns: ["competitor_id"]
             isOneToOne: false
             referencedRelation: "competitors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -278,7 +291,7 @@ export type Database = {
     }
     Enums: {
       diff_status: "created" | "approved" | "denied" | "implemented" | "failed"
-      diff_type: "snapshot" | "analytic"
+      diff_type: "snapshot" | "analytic" | "init"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -410,7 +423,7 @@ export const Constants = {
   public: {
     Enums: {
       diff_status: ["created", "approved", "denied", "implemented", "failed"],
-      diff_type: ["snapshot", "analytic"],
+      diff_type: ["snapshot", "analytic", "init"],
     },
   },
 } as const
