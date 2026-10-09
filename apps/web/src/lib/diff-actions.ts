@@ -22,15 +22,20 @@ async function setDiffStatus(diffId: string, status: 'approved' | 'denied'): Pro
   return true;
 }
 
+function projectPath(projectId: string): string {
+  return `/projects/${projectId}`;
+}
+
 export async function approveDiff(formData: FormData): Promise<void> {
   const diffId = String(formData.get('diff_id') ?? '');
-  if (!diffId) {
-    redirect('/diffs');
+  const projectId = String(formData.get('project_id') ?? '');
+  if (!diffId || !projectId) {
+    redirect('/');
   }
 
   const updated = await setDiffStatus(diffId, 'approved');
   if (!updated) {
-    redirect('/diffs');
+    redirect(projectPath(projectId));
   }
 
   try {
@@ -47,18 +52,19 @@ export async function approveDiff(formData: FormData): Promise<void> {
     }
   }
 
-  revalidatePath('/diffs');
+  revalidatePath(projectPath(projectId));
   revalidatePath('/');
 }
 
 export async function denyDiff(formData: FormData): Promise<void> {
   const diffId = String(formData.get('diff_id') ?? '');
-  if (!diffId) {
-    redirect('/diffs');
+  const projectId = String(formData.get('project_id') ?? '');
+  if (!diffId || !projectId) {
+    redirect('/');
   }
 
   await setDiffStatus(diffId, 'denied');
 
-  revalidatePath('/diffs');
+  revalidatePath(projectPath(projectId));
   revalidatePath('/');
 }
