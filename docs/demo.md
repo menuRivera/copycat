@@ -52,8 +52,10 @@ Project creation runs the `init` scan: one setup diff per competitor appears in 
 3. Change the competitor:
 
    ```bash
-   curl -X POST http://localhost:4400/version -d 2
+   curl -X POST http://localhost:4400/version -d 2   # variants: 1, 2, 3
    ```
+
+   v1 is the baseline, v2 changes hero/CTA/pricing, v3 adds team workspaces, "Book a demo" CTA, testimonials and new pricing — each toggle produces a different set of snapshot diffs.
 
 4. Run the scan again. The worker captures the new DOM, diffs it against the stored snapshot, asks Noul whether the change is visual, captures old/new section screenshots, and creates a snapshot diff.
 

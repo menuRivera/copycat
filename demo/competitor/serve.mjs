@@ -5,7 +5,14 @@ import { fileURLToPath } from 'node:url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.DEMO_COMPETITOR_PORT ?? 4400);
-let version = Number(process.env.DEMO_COMPETITOR_VERSION ?? 1) === 2 ? 2 : 1;
+const versionFiles = { 1: 'index.html', 2: 'v2.html', 3: 'v3.html' };
+
+function normalizeVersion(value) {
+  const parsed = Number(value);
+  return versionFiles[parsed] ? parsed : 1;
+}
+
+let version = normalizeVersion(process.env.DEMO_COMPETITOR_VERSION ?? 1);
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${port}`);
@@ -13,10 +20,9 @@ const server = createServer(async (req, res) => {
   if (req.method === 'GET' && url.pathname === '/') {
     const requested = url.searchParams.get('v');
     if (requested) {
-      version = Number(requested) === 2 ? 2 : 1;
+      version = normalizeVersion(requested);
     }
-    const file = version === 2 ? 'v2.html' : 'index.html';
-    const html = await readFile(path.join(dir, file));
+    const html = await readFile(path.join(dir, versionFiles[version]));
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     res.end(html);
     return;
@@ -27,7 +33,7 @@ const server = createServer(async (req, res) => {
     for await (const chunk of req) {
       body += chunk;
     }
-    version = Number(body.trim()) === 2 ? 2 : 1;
+    version = normalizeVersion(body.trim());
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ version }));
     return;
