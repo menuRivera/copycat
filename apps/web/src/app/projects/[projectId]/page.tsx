@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import type { Database } from '@copycat/core';
 import { AppHeader } from '@/components/app-header';
 import { DiffCard, type DiffCardData } from '@/components/diff-card';
+import { LiveRefresh } from '@/components/live-refresh';
 import { MotionList } from '@/components/motion-primitives';
 import { TabNav } from '@/components/tab-nav';
 import { createClient } from '@/lib/supabase/server';
@@ -104,6 +105,7 @@ export default async function ProjectDiffsPage({
   return (
     <div className="flex flex-col lg:h-dvh lg:overflow-hidden">
       <AppHeader />
+      <LiveRefresh />
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-8 lg:min-h-0">
         <nav className="flex items-center gap-2 text-sm">
