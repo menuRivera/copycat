@@ -12,6 +12,21 @@ const NETWORK_IDLE_TIMEOUT_MS = 15_000;
 const SETTLE_MS = 2_000;
 const MAX_CONSOLE_ERRORS = 5;
 
+export type BrowserValidationSignals = {
+  httpStatus: number;
+  pageErrors: string[];
+  consoleErrors: string[];
+};
+
+export function evaluateBrowserValidation(input: BrowserValidationSignals): 'passed' | 'failed' {
+  const ok =
+    input.httpStatus > 0 &&
+    input.httpStatus < 400 &&
+    input.pageErrors.length === 0 &&
+    input.consoleErrors.length <= MAX_CONSOLE_ERRORS;
+  return ok ? 'passed' : 'failed';
+}
+
 export async function validateDeployment(input: {
   diffId: string;
   url: string;
@@ -67,11 +82,10 @@ export async function validateDeployment(input: {
       screenshotUrl = null;
     }
 
-    const passed =
-      httpStatus < 400 && pageErrors.length === 0 && consoleErrors.length <= MAX_CONSOLE_ERRORS;
+    const status = evaluateBrowserValidation({ httpStatus, pageErrors, consoleErrors });
 
     return {
-      status: passed ? 'passed' : 'failed',
+      status,
       summary: `HTTP ${httpStatus}, ${pageErrors.length} page errors, ${consoleErrors.length} console errors`,
       notes: JSON.stringify({
         url: input.url,

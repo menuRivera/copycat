@@ -35,7 +35,7 @@ export function formatClickHouseDate(date: Date): string {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
 
-function monthWindow(offset: number, now: Date): { from: string; to: string } {
+export function monthWindow(offset: number, now: Date): { from: string; to: string } {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1));
   const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset + 1, 1));
   return { from: formatClickHouseDate(from), to: formatClickHouseDate(to) };
