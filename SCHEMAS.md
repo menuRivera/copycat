@@ -13,8 +13,8 @@
 - active
 - name
 - created_at
-- repo_url
-- deployment_url
+- repo_url (required, set at project creation)
+- deployment_url (optional for now)
 - version
 
 ## competitors
@@ -46,7 +46,7 @@
 - id
 - project_id
 - competitor_id
-- type (snapshot, analytic)
+- type (snapshot, analytic, init?)
 - old_screenshot_id (prev state)
 - new_screenshot_id (new state)
 - title

@@ -1,0 +1,1 @@
+-- Intentionally empty: projects and competitors are created through the web app.

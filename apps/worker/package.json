@@ -1,0 +1,26 @@
+{
+  "name": "worker",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
+    "scan": "tsx --env-file-if-exists=../../.env src/scripts/run-snapshot.ts",
+    "schedule": "tsx --env-file-if-exists=../../.env src/scripts/register-schedules.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.78",
+    "@copycat/core": "workspace:*",
+    "@supabase/supabase-js": "^2.117.3",
+    "@temporalio/client": "^1.24.0",
+    "@temporalio/worker": "^1.24.0",
+    "@temporalio/workflow": "^1.24.0",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "ai": "^7.0.136",
+    "playwright": "^1.64.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}

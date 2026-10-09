@@ -35,6 +35,7 @@ If behavior changes, notify user and ask if it's ok to update SCHEMAS.md and mat
 ## Good practices
 
 - TypeScript strict; avoid `any` unless justified.
+- Next.js 16 is installed and differs from older training data. Before writing Next.js code, read the relevant guide under `node_modules/next/dist/docs/` (apps/web).
 - Validate external input at boundaries with zod: env vars, LLM outputs, API payloads.
 - LLM/VLM structured outputs go through vercel/ai `generateObject` with zod schemas. Detectors use TypeSafe Jev Noul questions (typed yes/no answers); never parse text from models.
 - One focused question per Noul call; the caller handles iteration and parallelism.
@@ -51,6 +52,7 @@ If behavior changes, notify user and ask if it's ok to update SCHEMAS.md and mat
 - install: `pnpm install`
 - web dev: `pnpm --filter web dev`
 - worker dev: `pnpm --filter worker dev`
+- env: both apps read the repo-root `.env`. Web injects it via `apps/web/scripts/next-with-env.mjs` because `pnpm run` mangles `node --env-file*` flags. Never commit or read `.env`.
 - lint: `pnpm lint`
 - typecheck: `pnpm typecheck`
 - test: `pnpm test`
@@ -77,7 +79,7 @@ Storage:
 
 Seed:
 
-- `supabase/seed.sql` holds one demo project plus competitor for local runs.
+- `supabase/seed.sql` is intentionally empty. Projects and competitors are created through the web app.
 
 ## Git
 
