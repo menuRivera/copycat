@@ -193,12 +193,13 @@ export function DiffCard({
                   href={diff.old_screenshot_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+                  className="flex h-48 items-center justify-center overflow-hidden rounded-md border border-border bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
                 >
                   <img
                     src={diff.old_screenshot_url}
                     alt="Old state"
-                    className="h-48 w-full rounded-md border border-border object-cover object-top"
+                    loading="lazy"
+                    className="max-h-full max-w-full object-scale-down"
                   />
                 </a>
               </figure>
@@ -210,12 +211,13 @@ export function DiffCard({
                   href={diff.new_screenshot_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+                  className="flex h-48 items-center justify-center overflow-hidden rounded-md border border-border bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
                 >
                   <img
                     src={diff.new_screenshot_url}
                     alt="New state"
-                    className="h-48 w-full rounded-md border border-border object-cover object-top"
+                    loading="lazy"
+                    className="max-h-full max-w-full object-scale-down"
                   />
                 </a>
               </figure>
