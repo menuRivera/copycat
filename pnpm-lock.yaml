@@ -78,6 +78,9 @@ importers:
       '@anthropic-ai/claude-agent-sdk':
         specifier: ^0.3.295
         version: 0.3.295(@anthropic-ai/sdk@0.132.1(zod@4.6.5))(@modelcontextprotocol/sdk@1.32.1(zod@4.6.5))(zod@4.6.5)
+      '@clickhouse/client':
+        specifier: ^1.24.0
+        version: 1.24.0
       '@copycat/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -215,6 +218,10 @@ packages:
   '@babel/runtime@7.29.10':
     resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
     engines: {node: '>=6.9.0'}
+
+  '@clickhouse/client@1.24.0':
+    resolution: {integrity: sha512-1s/c/Fp9NFOWDJz+Zv363nVKH9ScaraZK6e+f/Ee3kwlt7egThT+KJSdYhd3OVCw+z0MzMktSjK+8Am1I5f/Hg==}
+    engines: {node: '>=20'}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -2848,6 +2855,8 @@ snapshots:
       zod: 4.6.5
 
   '@babel/runtime@7.29.10': {}
+
+  '@clickhouse/client@1.24.0': {}
 
   '@emnapi/runtime@1.11.3':
     dependencies:

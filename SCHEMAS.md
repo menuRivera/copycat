@@ -57,3 +57,15 @@
 - updated_at
 - status (created, approved, denied, implemented, failed)
 - commit
+
+## clickhouse (analytics, dev)
+
+events table (`copycat.events`, see `clickhouse/init.sql`):
+
+- project_id (uuid)
+- event_type (page_view, click, noop_click, load_time, api_req)
+- page, section, element
+- duration_ms
+- ts (DateTime)
+
+Metrics are aggregated per calendar month (this vs previous) into `{ metric, thisMonth, prevMonth, delta }` rows by the worker. Ingestion (otel + signoz) is not wired yet; dev data is seeded with `pnpm --filter worker seed:analytics <projectId>`.

@@ -7,6 +7,7 @@ import {
 } from './lib/capture';
 
 export * from './diffActivities';
+export * from './analyticsActivities';
 import { createServiceClient, downloadScreenshot, uploadScreenshot } from './lib/supabase';
 import {
   describeVisualDiff,

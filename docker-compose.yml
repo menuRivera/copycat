@@ -33,5 +33,19 @@ services:
     ports:
       - '8080:8080'
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.3
+    environment:
+      CLICKHOUSE_USER: copycat
+      CLICKHOUSE_PASSWORD: copycat
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro,z
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+
 volumes:
   temporal-postgres-data:
+  clickhouse-data:

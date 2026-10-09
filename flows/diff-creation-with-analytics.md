@@ -43,6 +43,8 @@ Side notes:
 
 - structure data is deterministic code (query + compute deltas), not an LLM step.
 - The diff record persists the originating statement (SCHEMAS: diffs.statement).
+- Ingestion is not wired yet (otel + signoz are the mental model). Dev data is seeded synthetically; the ClickHouse schema lives in `clickhouse/init.sql`.
+- gen-statements currently reasons over the structured metrics only; reading the project codebase is a future refinement.
 - gen-statements receives the structured data and returns statements shaped `{ category, statement, explanation }`, for example:
 
 ```json

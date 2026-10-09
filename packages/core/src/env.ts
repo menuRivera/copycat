@@ -16,6 +16,10 @@ export const envSchema = z.object({
   ANTHROPIC_MODEL: optionalString,
   WORKSPACE_DIR: optionalString,
   GITHUB_TOKEN: optionalString,
+  CLICKHOUSE_URL: optionalString,
+  CLICKHOUSE_USERNAME: optionalString,
+  CLICKHOUSE_PASSWORD: optionalString,
+  CLICKHOUSE_DATABASE: optionalString,
 });
 
 export type Env = z.infer<typeof envSchema>;
