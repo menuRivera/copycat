@@ -3,9 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { WorkflowExecutionAlreadyStartedError } from '@temporalio/client';
-import { env } from '@copycat/core';
+import { createLogger, env, errorMessage } from '@copycat/core';
 import { createClient } from '@/lib/supabase/server';
 import { getTemporalClient } from '@/lib/temporal';
+
+const log = createLogger({ component: 'web' });
 
 async function setDiffStatus(diffId: string, status: 'approved' | 'denied'): Promise<boolean> {
   const supabase = await createClient();
@@ -48,7 +50,10 @@ export async function approveDiff(formData: FormData): Promise<void> {
     });
   } catch (error) {
     if (!(error instanceof WorkflowExecutionAlreadyStartedError)) {
-      console.error('failed to start diffImplementationWorkflow', { diffId, error });
+      log.error('failed to start diffImplementationWorkflow', {
+        diffId,
+        error: errorMessage(error),
+      });
     }
   }
 

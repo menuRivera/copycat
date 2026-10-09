@@ -1,7 +1,9 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { analyticsIngestSchema, env } from '@copycat/core';
+import { analyticsIngestSchema, createLogger, env, errorMessage } from '@copycat/core';
 import { createServiceClient } from './lib/supabase';
 import { formatClickHouseDate, insertEvents } from './lib/clickhouse';
+
+const log = createLogger({ component: 'ingest' });
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const DEFAULT_PORT = 8787;
@@ -66,7 +68,7 @@ async function handleIngest(req: IncomingMessage, res: ServerResponse): Promise<
   }));
 
   await insertEvents(events);
-  console.log(`ingest accepted=${events.length} project=${data.id}`);
+  log.info('ingest accepted', { projectId: data.id, accepted: events.length });
   sendJson(res, 202, { accepted: events.length });
 }
 
@@ -81,7 +83,7 @@ const server = createServer((req, res) => {
   }
   if (req.method === 'POST' && req.url === '/ingest') {
     handleIngest(req, res).catch((error: unknown) => {
-      console.error('ingest failed', error);
+      log.error('ingest failed', { error: errorMessage(error) });
       sendJson(res, 500, { error: 'internal error' });
     });
     return;
@@ -91,7 +93,7 @@ const server = createServer((req, res) => {
 
 const port = Number(env.INGEST_PORT ?? DEFAULT_PORT);
 server.listen(port, () => {
-  console.log(`ingest server listening on http://localhost:${port} (POST /ingest)`);
+  log.info('ingest server listening', { port, endpoint: `http://localhost:${port}/ingest` });
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

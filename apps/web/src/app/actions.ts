@@ -3,10 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { env, projectCreateSchema } from '@copycat/core';
+import { createLogger, env, errorMessage, projectCreateSchema } from '@copycat/core';
 import { createClient } from '@/lib/supabase/server';
 import { getTemporalClient } from '@/lib/temporal';
 import type { ProjectFormState } from './project-form-state';
+
+const log = createLogger({ component: 'web' });
 
 function firstMessages(fieldErrors: Record<string, string[] | undefined>): Record<string, string> {
   const result: Record<string, string> = {};
@@ -86,7 +88,10 @@ export async function createProject(
       args: [{ projectIds: [project.id], mode: input.deployment_url ? 'gap' : 'init' }],
     });
   } catch (error) {
-    console.error('failed to start project setup workflow', { projectId: project.id, error });
+    log.error('failed to start project setup workflow', {
+      projectId: project.id,
+      error: errorMessage(error),
+    });
   }
 
   revalidatePath('/');

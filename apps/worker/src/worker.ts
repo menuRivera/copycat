@@ -1,7 +1,9 @@
 import path from 'node:path';
 import { Worker, NativeConnection } from '@temporalio/worker';
-import { env } from '@copycat/core';
+import { createLogger, env, errorMessage } from '@copycat/core';
 import * as activities from './activities';
+
+const log = createLogger({ component: 'worker' });
 
 export async function run(): Promise<void> {
   const connection = await NativeConnection.connect({ address: env.TEMPORAL_ADDRESS });
@@ -16,6 +18,6 @@ export async function run(): Promise<void> {
 }
 
 run().catch((error: unknown) => {
-  console.error(error);
+  log.error('worker crashed', { error: errorMessage(error) });
   process.exit(1);
 });
