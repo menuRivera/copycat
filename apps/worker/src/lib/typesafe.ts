@@ -10,19 +10,23 @@ function getClient(): TypeSafeClient {
   return client;
 }
 
-export async function isVisualDiff(domDiff: DomDiff): Promise<boolean> {
+export async function askNoul(instructions: string, state: unknown): Promise<number> {
   const { answers } = await getClient().systemOne({
-    state: {
+    state: state as string,
+    questions: { answer: noul(instructions) },
+  });
+  return answers.answer.noul;
+}
+
+export async function isVisualDiff(domDiff: DomDiff): Promise<boolean> {
+  const value = await askNoul(
+    'Is this DOM change a visual diff, meaning users would notice it on the rendered page, rather than a purely structural, meta, or invisible change?',
+    {
       selector: domDiff.selector,
       summary: domDiff.summary,
       old_text: domDiff.old_text,
       new_text: domDiff.new_text,
     },
-    questions: {
-      visual: noul(
-        'Is this DOM change a visual diff, meaning users would notice it on the rendered page, rather than a purely structural, meta, or invisible change?',
-      ),
-    },
-  });
-  return answers.visual.noul > NOUL_YES_THRESHOLD;
+  );
+  return value > NOUL_YES_THRESHOLD;
 }

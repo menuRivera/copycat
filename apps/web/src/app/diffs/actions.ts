@@ -39,6 +39,7 @@ export async function approveDiff(formData: FormData): Promise<void> {
       taskQueue: env.TEMPORAL_TASK_QUEUE,
       workflowId: `diff-${diffId}`,
       args: [{ diffId }],
+      workflowIdReusePolicy: 'ALLOW_DUPLICATE',
     });
   } catch (error) {
     if (!(error instanceof WorkflowExecutionAlreadyStartedError)) {

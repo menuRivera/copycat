@@ -14,6 +14,8 @@ export const envSchema = z.object({
   TYPESAFE_API_KEY: optionalString,
   ANTHROPIC_API_KEY: optionalString,
   ANTHROPIC_MODEL: optionalString,
+  WORKSPACE_DIR: optionalString,
+  GITHUB_TOKEN: optionalString,
 });
 
 export type Env = z.infer<typeof envSchema>;

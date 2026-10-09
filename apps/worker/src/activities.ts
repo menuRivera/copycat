@@ -5,6 +5,8 @@ import {
   screenshotLiveSection,
   screenshotStoredDom,
 } from './lib/capture';
+
+export * from './diffActivities';
 import { createServiceClient, downloadScreenshot, uploadScreenshot } from './lib/supabase';
 import {
   describeVisualDiff,
