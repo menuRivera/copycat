@@ -1,7 +1,12 @@
 {
   "name": "copycat",
   "private": true,
+  "license": "GPL-2.0",
   "packageManager": "pnpm@10.30.0",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:worker": "pnpm --filter worker dev",
