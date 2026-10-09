@@ -1,7 +1,10 @@
 import { generateObject } from 'ai';
 import {
   analyticStatementListSchema,
+  buildAnalyticDiffPrompt,
+  buildStatementsPrompt,
   diffFieldsSchema,
+  DIFF_WORTHY_QUESTION,
   type AnalyticStatement,
   type DiffFields,
   type StructuredMetric,
@@ -48,14 +51,7 @@ export async function generateStatements(input: {
   const { object } = await generateObject({
     model: getModel(),
     schema: analyticStatementListSchema,
-    instructions:
-      'You are a product analyst. Given month-over-month product metrics, produce a short list of the most insightful, specific findings. Each statement has a category (conversion, ux, performance, content), a statement that cites the actual numbers, and an explanation of why it matters and what it suggests. Prefer findings that point to concrete product changes; ignore noise and tiny deltas.',
-    prompt: [
-      `Project: ${input.project.name}`,
-      `Repository: ${input.project.repoUrl}`,
-      'Metrics (thisMonth vs prevMonth):',
-      JSON.stringify(input.metrics, null, 2),
-    ].join('\n'),
+    ...buildStatementsPrompt(input),
   });
   return object.statements;
 }
@@ -63,10 +59,7 @@ export async function generateStatements(input: {
 export async function filterDiffWorthy(input: {
   statement: AnalyticStatement;
 }): Promise<boolean> {
-  const score = await askNoul(
-    'Is this analytics statement specific and actionable enough to justify a code change in our product?',
-    input.statement,
-  );
+  const score = await askNoul(DIFF_WORTHY_QUESTION, input.statement);
   return score > NOUL_YES_THRESHOLD;
 }
 
@@ -77,15 +70,7 @@ export async function generateAnalyticDiff(input: {
   const { object } = await generateObject({
     model: getModel(),
     schema: diffFieldsSchema,
-    instructions:
-      'Turn this product-analytics finding into a proposed change for our own product. Write a short title, a human-readable description explaining the finding and the proposed change, and a precise instruction for a coding agent working in our repository. Also classify the product area, the expected business impact (low, medium or high), and what should happen once the change is applied.',
-    prompt: [
-      `Project: ${input.project.name}`,
-      `Repository: ${input.project.repoUrl}`,
-      `Category: ${input.statement.category}`,
-      `Statement: ${input.statement.statement}`,
-      `Explanation: ${input.statement.explanation}`,
-    ].join('\n'),
+    ...buildAnalyticDiffPrompt(input),
   });
   return object;
 }

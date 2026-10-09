@@ -5,3 +5,4 @@ export * from './schemas/project';
 export * from './schemas/domDiff';
 export * from './schemas/analytics';
 export * from './analytics/metrics';
+export * from './prompts';

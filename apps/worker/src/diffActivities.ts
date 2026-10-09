@@ -1,5 +1,12 @@
 import { Client, Connection } from '@temporalio/client';
-import { env } from '@copycat/core';
+import {
+  buildImplementPrompt,
+  buildPlanPrompt,
+  buildRefinePlanPrompt,
+  env,
+  REVIEW_CHANGE_QUESTION,
+  type AgentChangeRequest,
+} from '@copycat/core';
 import { createServiceClient } from './lib/supabase';
 import { runAgent } from './lib/agent';
 import {
@@ -35,15 +42,15 @@ export type DiffData = {
   status: string;
 };
 
-function requestBlock(diff: DiffData): string {
-  return [
-    `Title: ${diff.title}`,
-    `Area: ${diff.area ?? 'unknown'}`,
-    `Impact: ${diff.impact ?? 'unknown'}`,
-    `Description: ${diff.description}`,
-    `Instruction: ${diff.instruction}`,
-    `Expected outcome: ${diff.expectedOutcome ?? 'not specified'}`,
-  ].join('\n');
+function toAgentRequest(diff: DiffData): AgentChangeRequest {
+  return {
+    title: diff.title,
+    area: diff.area,
+    impact: diff.impact,
+    description: diff.description,
+    instruction: diff.instruction,
+    expectedOutcome: diff.expectedOutcome,
+  };
 }
 
 export async function getDiffData(input: { diffId: string }): Promise<DiffData> {
@@ -129,10 +136,7 @@ export async function planChange(input: { worktreeDir: string; diff: DiffData })
     cwd: input.worktreeDir,
     allowedTools: ['Read', 'Glob', 'Grep'],
     maxTurns: 30,
-    prompt: `You are planning a code change in this repository. Read the repository and produce a detailed, concrete implementation plan for the change request below. Do not modify any files.
-
-Change request:
-${requestBlock(input.diff)}`,
+    prompt: buildPlanPrompt(toAgentRequest(input.diff)),
   });
 }
 
@@ -146,13 +150,7 @@ export async function implementChange(input: {
     cwd: input.worktreeDir,
     allowedTools: ['Read', 'Edit', 'Write', 'Bash', 'Glob', 'Grep'],
     maxTurns: 80,
-    prompt: `Implement the change request below in this repository. Follow the plan. Make all code changes, then stop: the harness commits your changes for you, do not run git commit.
-
-Change request:
-${requestBlock(input.diff)}
-
-Plan:
-${input.plan}`,
+    prompt: buildImplementPrompt(toAgentRequest(input.diff), input.plan),
   });
 
   const commit = await commitAll(
@@ -170,18 +168,14 @@ export async function reviewChange(input: {
   const diffText = truncate(await diffFromBase(input.repoDir, input.worktreeDir), 20_000);
   const tests = await runTests(input.worktreeDir);
 
-  const score = await askNoul(
-    'Does this git diff fully and correctly implement the requested change, and do the tests pass when tests exist?',
-    {
-      request: {
-        title: input.diff.title,
-        description: input.diff.description,
-        instruction: input.diff.instruction,
-      },
-      git_diff: diffText,
-      tests: { ran: tests.ran, passed: tests.passed, output: tests.output },
+  const score = await askNoul(REVIEW_CHANGE_QUESTION, {
+    request: {
+      title: input.diff.title,
+      description: input.diff.description,
+      instruction: input.diff.instruction,
     },
-  );
+    git_diff: diffText,
+  });
 
   const valid = score > NOUL_YES_THRESHOLD && tests.passed;
   if (valid) {
@@ -192,16 +186,11 @@ export async function reviewChange(input: {
     cwd: input.worktreeDir,
     allowedTools: ['Read', 'Glob', 'Grep', 'Bash'],
     maxTurns: 30,
-    prompt: `A previous implementation attempt for the change request below is not valid yet. Inspect the repository and the current changes, then produce a refined, concrete implementation plan to fix the issues. Do not modify files.
-
-Change request:
-${requestBlock(input.diff)}
-
-Current git diff:
-${diffText}
-
-Test result:
-${tests.output}`,
+    prompt: buildRefinePlanPrompt({
+      request: toAgentRequest(input.diff),
+      diffText,
+      testOutput: tests.output,
+    }),
   });
 
   return { valid: false, refinedPlan };

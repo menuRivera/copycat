@@ -1,5 +1,5 @@
 import { TypeSafeClient, noul } from '@typesafe-ai/sdk';
-import { env, type DomDiff } from '@copycat/core';
+import { env, IS_VISUAL_DIFF_QUESTION, type DomDiff } from '@copycat/core';
 
 export const NOUL_YES_THRESHOLD = 0.5;
 
@@ -19,14 +19,11 @@ export async function askNoul(instructions: string, state: unknown): Promise<num
 }
 
 export async function isVisualDiff(domDiff: DomDiff): Promise<boolean> {
-  const value = await askNoul(
-    'Is this DOM change a visual diff, meaning users would notice it on the rendered page, rather than a purely structural, meta, or invisible change?',
-    {
-      selector: domDiff.selector,
-      summary: domDiff.summary,
-      old_text: domDiff.old_text,
-      new_text: domDiff.new_text,
-    },
-  );
+  const value = await askNoul(IS_VISUAL_DIFF_QUESTION, {
+    selector: domDiff.selector,
+    summary: domDiff.summary,
+    old_text: domDiff.old_text,
+    new_text: domDiff.new_text,
+  });
   return value > NOUL_YES_THRESHOLD;
 }
