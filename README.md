@@ -57,6 +57,11 @@ Note: `flows/` and `docs/architecture.md` describe the current implementation an
 
 **Add an agent or tool:** follow the activity pattern in `docs/harness.md` — zod schema in `packages/core`, side effect as an exported activity, typed Noul questions for verdicts, deterministic workflow code only.
 
+## CI and deploys
+
+- `.github/workflows/ci.yml` (PRs + main): lint, typecheck, tests, migration validation (`supabase db start` + `supabase db reset`) and mermaid diagram validation.
+- `.github/workflows/deploy-migrations.yml`: manual (`workflow_dispatch`) `supabase db push` to the hosted Supabase project. To use it, set the repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` and `SUPABASE_DB_PASSWORD`.
+
 ## Known limitations
 
 - Analytics ingestion uses a local ingest server for the demo; OTel/Signoz production wiring is pending. No session replay, feature flags or experiments.
