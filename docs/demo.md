@@ -74,6 +74,30 @@ Project creation runs the `init` scan: one setup diff per competitor appears in 
 
 Note: with a real GitHub `repo_url` and `GITHUB_TOKEN`, step 6 instead pushes the branch and opens a pull request (status `pr_open`), and validation targets the PR preview deployment when the platform exposes one. Nothing is auto-merged: the human merges the validated PR.
 
+## Screenshots
+
+Captured from a fresh local run (Scenario A: competitor v1 → v2, hero CTA diff approved and shipped).
+
+![Competitor change](screenshots/competitor-change.png)
+
+_The competitor change that triggers detection (v2 fixture)._
+
+![Pending diffs before approval](screenshots/before-accepting.png)
+
+_Pending tab with the snapshot diffs created from the change._
+
+![Diff card](screenshots/diff-card.png)
+
+_Change Intelligence card: area, impact, proposed change, old/new evidence and "If approved" outcome._
+
+![Shipped after approval](screenshots/after-accepting.png)
+
+_Shipped tab after the coding agent implemented, validated and merged the approved change._
+
+![Temporal workflow timeline](screenshots/temporal-workflow.png)
+
+_The successful `diffImplementationWorkflow` run (plan → implement → review → validate → release) in the Temporal UI._
+
 ## Scenario B — behavior opportunity
 
 1. Seed two months of product events for the project (or POST the same events to the ingest server with the project's `ingest_token`):
