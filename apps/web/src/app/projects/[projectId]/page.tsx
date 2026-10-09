@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import type { Database } from '@copycat/core';
 import { AppHeader } from '@/components/app-header';
 import { DiffCard, type DiffCardData } from '@/components/diff-card';
+import { MotionList } from '@/components/motion-primitives';
+import { TabNav } from '@/components/tab-nav';
 import { createClient } from '@/lib/supabase/server';
 
 type DiffStatus = Database['public']['Enums']['diff_status'];
@@ -94,42 +96,35 @@ export default async function ProjectDiffsPage({
   }));
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50">
+    <div className="flex flex-col lg:h-dvh lg:overflow-hidden">
       <AppHeader />
 
-      <main className="mx-auto w-full max-w-5xl px-6 py-8">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-8 lg:min-h-0">
         <nav className="flex items-center gap-2 text-sm">
-          <Link href="/" className="text-zinc-500 hover:text-zinc-900">
+          <Link
+            href="/"
+            className="text-muted transition-colors hover:text-accent-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+          >
             Projects
           </Link>
-          <span className="text-zinc-300">/</span>
-          <span className="font-medium text-zinc-900">{project.name}</span>
+          <span className="text-faint">/</span>
+          <span className="font-medium text-foreground">{project.name}</span>
         </nav>
 
-        <div className="mt-5 flex gap-1 border-b border-zinc-200">
-          {Object.entries(TABS).map(([key, config]) => {
-            const active = key === activeTab;
-            return (
-              <Link
-                key={key}
-                href={`/projects/${project.id}?tab=${key}`}
-                className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-sm ${
-                  active
-                    ? 'border-zinc-900 font-medium text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:text-zinc-800'
-                }`}
-              >
-                {config.label}
-                <span className="ml-1.5 text-xs text-zinc-400">{counts[key]}</span>
-              </Link>
-            );
-          })}
-        </div>
+        <TabNav
+          projectId={project.id}
+          activeTab={activeTab}
+          tabs={Object.entries(TABS).map(([key, config]) => ({
+            key,
+            label: config.label,
+            count: counts[key],
+          }))}
+        />
 
         {error ? <p className="mt-4 text-sm text-red-700">{error.message}</p> : null}
 
         {cards.length > 0 ? (
-          <ul className="mt-5 flex flex-col gap-5">
+          <MotionList className="mt-5 flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:[scrollbar-gutter:stable] lg:pb-2">
             {cards.map((diff) => (
               <DiffCard
                 key={diff.id}
@@ -139,9 +134,9 @@ export default async function ProjectDiffsPage({
                 showReviewActions={activeTab === 'pending'}
               />
             ))}
-          </ul>
+          </MotionList>
         ) : (
-          <p className="mt-5 rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-8 text-center text-sm text-zinc-500">
+          <p className="mt-5 rounded-lg border border-dashed border-border bg-surface px-5 py-8 text-center text-sm text-muted">
             {TABS[activeTab].empty}
           </p>
         )}

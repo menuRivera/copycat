@@ -1,10 +1,14 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import { useActionState, useState } from 'react';
 import { createProject } from './actions';
 import { initialProjectFormState } from './project-form-state';
 
 type CompetitorRow = { key: number };
+
+const inputStyles =
+  'w-full rounded-md border border-zinc-300 bg-surface px-3 py-2 text-sm text-foreground placeholder:text-faint focus:border-accent-600 focus:outline-2 focus:outline-offset-0 focus:outline-accent-600';
 
 function Field({
   label,
@@ -21,7 +25,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-zinc-700" htmlFor={name}>
+      <label className="text-sm font-medium text-foreground" htmlFor={name}>
         {label}
       </label>
       <input
@@ -29,7 +33,7 @@ function Field({
         name={name}
         placeholder={placeholder}
         required={required}
-        className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500"
+        className={inputStyles}
       />
       {error ? <p className="text-xs text-red-700">{error}</p> : null}
     </div>
@@ -68,35 +72,41 @@ export function ProjectForm() {
       />
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-700">Competitors (at least one)</span>
-        {rows.map((row) => (
-          <div key={row.key} className="flex gap-2">
-            <input
-              name="competitor_name"
-              placeholder="Name (optional)"
-              className="w-32 rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500"
-            />
-            <input
-              name="competitor_url"
-              placeholder="https://rival.example.com"
-              required
-              className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500"
-            />
-            {rows.length > 1 ? (
-              <button
-                type="button"
-                onClick={() => removeRow(row.key)}
-                className="rounded-md border border-zinc-300 px-2 text-sm text-zinc-600 hover:bg-zinc-100"
-              >
-                Remove
-              </button>
-            ) : null}
-          </div>
-        ))}
+        <span className="text-sm font-medium text-foreground">Competitors (at least one)</span>
+        <AnimatePresence initial={false}>
+          {rows.map((row) => (
+            <motion.div
+              key={row.key}
+              layout
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="flex gap-2"
+            >
+              <input name="competitor_name" placeholder="Name (optional)" className={`${inputStyles} w-32`} />
+              <input
+                name="competitor_url"
+                placeholder="https://rival.example.com"
+                required
+                className={`${inputStyles} flex-1`}
+              />
+              {rows.length > 1 ? (
+                <motion.button
+                  type="button"
+                  onClick={() => removeRow(row.key)}
+                  whileTap={{ scale: 0.98 }}
+                  className="rounded-md px-2 text-sm text-muted transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+                >
+                  Remove
+                </motion.button>
+              ) : null}
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <button
           type="button"
           onClick={addRow}
-          className="self-start rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100"
+          className="self-start rounded-md border border-zinc-300 bg-surface px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
         >
           Add competitor
         </button>
@@ -109,13 +119,14 @@ export function ProjectForm() {
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{state.formError}</p>
       ) : null}
 
-      <button
+      <motion.button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
+        whileTap={{ scale: 0.98 }}
+        className="rounded-md bg-accent-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600 disabled:pointer-events-none disabled:opacity-50"
       >
         {pending ? 'Creating...' : 'Create project'}
-      </button>
+      </motion.button>
     </form>
   );
 }
